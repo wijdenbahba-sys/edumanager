@@ -22,13 +22,21 @@
         <!-- Carte Notes -->
         <div class="bg-white rounded-lg shadow p-6 md:col-span-2">
             
-            <!-- Titre et Bouton PDF -->
+            <!-- Titre et Boutons d'action -->
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold text-gray-800">Notes de l'étudiant</h2>
-                <a href="{{ route('students.bulletin', $student->id) }}" 
-                   style="background-color: #16a34a; color: #ffffff; text-decoration: none; padding: 8px 16px; border-radius: 5px; font-weight: bold; display: inline-block;">
-                    Télécharger le Bulletin PDF
-                </a>
+                <div class="flex gap-2">
+                    <!-- Bouton Absences -->
+                    <a href="{{ route('students.absences', $student->id) }}" 
+                       style="background-color: #ea580c; color: #ffffff; text-decoration: none; padding: 8px 16px; border-radius: 5px; font-weight: bold; display: inline-block;">
+                        Gérer les Absences
+                    </a>
+                    <!-- Bouton PDF -->
+                    <a href="{{ route('students.bulletin', $student->id) }}" 
+                       style="background-color: #16a34a; color: #ffffff; text-decoration: none; padding: 8px 16px; border-radius: 5px; font-weight: bold; display: inline-block;">
+                        Télécharger le Bulletin PDF
+                    </a>
+                </div>
             </div>
 
             @if(session('success'))

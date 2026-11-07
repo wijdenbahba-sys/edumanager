@@ -116,4 +116,29 @@ class StudentController extends Controller
         // On télécharge le fichier
         return $pdf->download('bulletin_' . str_replace(' ', '_', $student->user->name) . '.pdf');
     }
+        public function absences(Student $student)
+    {
+        // On charge l'étudiant avec ses absences et le cours concerné
+        $student->load(['user', 'classRoom', 'absences.course']);
+        $courses = \App\Models\Course::all();
+        
+        return view('students.absences', compact('student', 'courses'));
+    }
+
+    public function addAbsence(Request $request, Student $student)
+    {
+        $request->validate([
+            'course_id' => 'required|exists:courses,id',
+            'date' => 'required|date',
+        ]);
+
+        \App\Models\Absence::create([
+            'student_id' => $student->id,
+            'course_id' => $request->course_id,
+            'date' => $request->date,
+            'justifiee' => $request->has('justifiee') ? true : false,
+        ]);
+
+        return redirect()->back()->with('success', 'Absence enregistrée avec succès !');
+    }
 }
