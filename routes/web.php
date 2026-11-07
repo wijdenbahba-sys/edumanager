@@ -12,7 +12,11 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $totalStudents = \App\Models\Student::count();
+    $totalTeachers = \App\Models\Teacher::count();
+    $totalCourses = \App\Models\Course::count();
+    
+    return view('dashboard', compact('totalStudents', 'totalTeachers', 'totalCourses'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

@@ -12,7 +12,7 @@
                 </div>
                 <div>
                     <div class="text-gray-500 text-sm font-semibold">Total Étudiants</div>
-                    <div class="text-2xl font-bold text-gray-800">0</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ $totalStudents }}</div>
                 </div>
             </div>
         </div>
@@ -25,7 +25,7 @@
                 </div>
                 <div>
                     <div class="text-gray-500 text-sm font-semibold">Enseignants</div>
-                    <div class="text-2xl font-bold text-gray-800">0</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ $totalTeachers }}</div>
                 </div>
             </div>
         </div>
@@ -38,7 +38,7 @@
                 </div>
                 <div>
                     <div class="text-gray-500 text-sm font-semibold">Cours Actifs</div>
-                    <div class="text-2xl font-bold text-gray-800">0</div>
+                    <div class="text-2xl font-bold text-gray-800">{{ $totalCourses }}</div>
                 </div>
             </div>
         </div>
