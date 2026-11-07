@@ -7,6 +7,7 @@ use App\Models\ClassRoom;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class StudentController extends Controller
 {
@@ -80,5 +81,19 @@ class StudentController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Note ajoutée avec succès !');
+    }
+        public function downloadBulletin(Student $student)
+    {
+        // On charge l'étudiant avec toutes ses relations
+        $student->load(['user', 'classRoom', 'grades.course']);
+        
+        // On calcule sa moyenne générale
+        $average = $student->grades->avg('note') ?? 0;
+
+        // On génère le PDF avec la vue 'students.bulletin'
+        $pdf = Pdf::loadView('students.bulletin', compact('student', 'average'));
+
+        // On télécharge le fichier
+        return $pdf->download('bulletin_' . str_replace(' ', '_', $student->user->name) . '.pdf');
     }
 }
