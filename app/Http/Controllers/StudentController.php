@@ -11,11 +11,31 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class StudentController extends Controller
 {
-    public function index()
+       public function index(Request $request)
     {
-        // On récupère les étudiants avec leur utilisateur et leur classe
-        $students = Student::with(['user', 'classRoom'])->paginate(10);
-        return view('students.index', compact('students'));
+        // On commence la requête avec les relations
+        $query = Student::with(['user', 'classRoom']);
+
+        // Si on a tapé quelque chose dans la recherche
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Si on a sélectionné une classe dans le menu déroulant
+        if ($request->has('class_id') && $request->class_id != '') {
+            $query->where('class_id', $request->class_id);
+        }
+
+        $students = $query->paginate(10);
+        
+        // On récupère toutes les classes pour le menu déroulant
+        $classes = \App\Models\ClassRoom::all();
+
+        return view('students.index', compact('students', 'classes'));
     }
 
     public function create()
