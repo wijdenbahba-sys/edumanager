@@ -37,4 +37,6 @@ Route::middleware('auth')->group(function () {
 Route::resource('students', \App\Http\Controllers\StudentController::class)->middleware('auth');
 Route::post('/students/{student}/grades', [\App\Http\Controllers\StudentController::class, 'addGrade'])->name('students.addGrade')->middleware('auth');
 Route::get('/students/{student}/bulletin', [\App\Http\Controllers\StudentController::class, 'downloadBulletin'])->name('students.bulletin')->middleware('auth');
+Route::resource('teachers', \App\Http\Controllers\TeacherController::class)->middleware('auth');
+
 require __DIR__.'/auth.php';
