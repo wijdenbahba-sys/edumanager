@@ -15,7 +15,7 @@
         
         <nav style="display: flex; flex-direction: column; gap: 10px;">
             <a href="{{ route('dashboard') }}" style="color: #d1d5db; text-decoration: none; padding: 10px; border-radius: 5px; display: block;">📊 Tableau de bord</a>
-            <a href="#" style="color: #d1d5db; text-decoration: none; padding: 10px; border-radius: 5px; display: block;">👨‍🎓 Étudiants</a>
+            <a href="{{ route('students.index') }}" style="color: #d1d5db; text-decoration: none; padding: 10px; border-radius: 5px; display: block;">👨‍🎓 Étudiants</a>
             <a href="#" style="color: #d1d5db; text-decoration: none; padding: 10px; border-radius: 5px; display: block;">👨‍🏫 Enseignants</a>
             <a href="#" style="color: #d1d5db; text-decoration: none; padding: 10px; border-radius: 5px; display: block;">📚 Cours & Notes</a>
         </nav>
