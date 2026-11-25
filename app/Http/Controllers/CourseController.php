@@ -16,10 +16,10 @@ class CourseController extends Controller
         return view('courses.index', compact('courses'));
     }
 
-    public function create()
+       public function create()
     {
-        $teachers = Teacher::with('user')->get();
-        $classes = ClassRoom::all();
+        $teachers = \App\Models\Teacher::with('user')->get();
+        $classes = \App\Models\ClassRoom::all();
         return view('courses.create', compact('teachers', 'classes'));
     }
 

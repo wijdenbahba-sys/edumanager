@@ -24,4 +24,7 @@ class Course extends Model
     public function grades() {
         return $this->hasMany(Grade::class);
     }
-}
+    public function documents()
+    {
+        return $this->hasMany(CourseDocument::class);
+    }}

@@ -23,20 +23,15 @@
         <div class="bg-white rounded-lg shadow p-6 md:col-span-2">
             
             <!-- Titre et Boutons d'action -->
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-gray-800">Notes de l'étudiant</h2>
-                <div class="flex gap-2">
-                    <!-- Bouton Absences -->
-                    <a href="{{ route('students.absences', $student->id) }}" 
-                       style="background-color: #ea580c; color: #ffffff; text-decoration: none; padding: 8px 16px; border-radius: 5px; font-weight: bold; display: inline-block;">
-                        Gérer les Absences
-                    </a>
-                    <!-- Bouton PDF -->
-                    <a href="{{ route('students.bulletin', $student->id) }}" 
-                       style="background-color: #16a34a; color: #ffffff; text-decoration: none; padding: 8px 16px; border-radius: 5px; font-weight: bold; display: inline-block;">
-                        Télécharger le Bulletin PDF
-                    </a>
-                </div>
+                       <!-- Titre et Boutons d'action -->
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                <a href="{{ route('students.absences', $student->id) }}" style="background-color: #ea580c; color: white; padding: 8px 16px; text-decoration: none; border-radius: 5px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    Gérer les Absences
+                </a>
+                
+                <a href="{{ route('students.bulletin.download', $student->id) }}" style="background-color: #16a34a; color: white; padding: 8px 16px; text-decoration: none; border-radius: 5px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    Télécharger le Bulletin PDF
+                </a>
             </div>
 
             @if(session('success'))
@@ -74,6 +69,7 @@
             </table>
 
             <!-- Formulaire d'ajout de note -->
+              @if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('teacher'))
             <div class="bg-gray-50 p-4 rounded border border-gray-200">
                 <h3 class="font-bold text-gray-700 mb-3">Ajouter une note</h3>
                 <form action="{{ route('students.addGrade', $student->id) }}" method="POST" class="flex items-end gap-3">
@@ -102,7 +98,48 @@
                         Ajouter
                     </button>
                 </form>
+                @endif
             </div>
         </div>
     </div>
+        <!-- Graphique mte3 les notes mte3 l'étudiant -->
+    <div class="mt-8 bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Évolution des notes par matière</h2>
+        <canvas id="studentGradesChart" height="100"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('studentGradesChart').getContext('2d');
+        
+        // Njibou les notes mte3 l'étudiant mel blade
+        const grades = @json($grades);
+        
+        // Na3mlou les labels w les data
+        const labels = grades.map(g => g.course.nom);
+        const data = grades.map(g => g.note);
+
+        const myChart = new Chart(ctx, {
+            type: 'bar', // Des barres (kima el dashboard)
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Note / 20',
+                    data: data,
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)', // Loun zr9a
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1,
+                    borderRadius: 5, // zwaya m dawrin
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true, max: 20 }
+                },
+                plugins: {
+                    legend: { display: false } // N7iyna el legende bch tban hayla
+                }
+            }
+        });
+    </script>
 @endsection

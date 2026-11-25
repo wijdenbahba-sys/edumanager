@@ -47,6 +47,7 @@
         </table>
 
         <!-- Formulaire d'ajout d'absence -->
+         @if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('teacher'))
         <div class="bg-gray-50 p-4 rounded border border-gray-200">
             <h3 class="font-bold text-gray-700 mb-3">Déclarer une nouvelle absence</h3>
             <form action="{{ route('students.addAbsence', $student->id) }}" method="POST" class="flex items-end gap-4">
@@ -72,5 +73,6 @@
                 </button>
             </form>
         </div>
+         @endif
     </div>
 @endsection

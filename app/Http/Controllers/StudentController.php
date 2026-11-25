@@ -75,70 +75,137 @@ class StudentController extends Controller
         $student->user->delete(); // Supprime l'utilisateur (et l'étudiant par cascade)
         return redirect()->route('students.index')->with('success', 'Étudiant supprimé !');
     }
-        public function show(Student $student)
+         public function show(Student $student)
     {
-        // On charge les notes de l'étudiant avec le nom du cours
-        $student->load(['user', 'classRoom', 'grades.course']);
-        $courses = \App\Models\Course::all(); // Pour le menu déroulant d'ajout de note
+        $grades = $student->grades()->with('course')->get();
+        $average = $grades->avg('note') ?? 0;
+        $classes = \App\Models\ClassRoom::all();
+        $courses = \App\Models\Course::all(); // <-- Hna zedna hadhi
         
-        return view('students.show', compact('student', 'courses'));
+        return view('students.show', compact('student', 'grades', 'average', 'classes', 'courses'));
     }
 
-    public function addGrade(Request $request, Student $student)
+       public function addAbsence(Request $request, Student $student)
+    {
+        $request->validate([
+            'course_id' => 'required|exists:courses,id',
+            'date' => 'required|date',
+            'justifiee' => 'nullable|boolean',
+        ]);
+          
+        $student->absences()->create([
+            'course_id' => $request->course_id,
+            'date' => $request->date,
+            'justifiee' => $request->has('justifiee') ? 1 : 0,
+        ]);
+      // Zidna hadhi bch yjih notification
+        $student->user->notify(new \App\Notifications\NewGradeNotification(
+            'Une nouvelle note a été ajoutée en ' . $request->course_id
+        ));
+        return redirect()->back()->with('success', 'Absence ajoutée avec succès.');
+    }
+          
+
+    
+       
+
+        public function bulletin(Student $student)
+    {
+        $grades = $student->grades()->with('course')->get();
+        
+        // N7seb el moyenne (average) hna
+        $average = $grades->avg('note') ?? 0; 
+
+        return view('students.bulletin', compact('student', 'grades', 'average'));
+    }
+      public function downloadBulletin(Student $student)
+    {
+        $grades = $student->grades()->with('course')->get();
+        $average = $grades->avg('note') ?? 0;
+
+        // N7adher el HTML elli bech ykoun fil PDF
+        $html = view('students.bulletin_pdf', compact('student', 'grades', 'average'))->render();
+
+        // Nesta3mlou DomPDF bch nsayrou PDF
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
+        
+        // N7adherou esm el fichier
+        $fileName = 'bulletin_' . str_replace(' ', '_', $student->user->name) . '.pdf';
+
+        // N-téléchargiw el fichier
+        return $pdf->download($fileName);
+    }
+        public function addGrade(Request $request, Student $student)
     {
         $request->validate([
             'course_id' => 'required|exists:courses,id',
             'note' => 'required|numeric|min:0|max:20',
             'type' => 'required|string',
         ]);
-
-        \App\Models\Grade::create([
-            'student_id' => $student->id,
+                
+        $student->grades()->create([
             'course_id' => $request->course_id,
             'note' => $request->note,
             'type' => $request->type,
-            'date' => now(),
+            'date' => now(), // Wala tzid date mn formulaire
         ]);
+        // Zidna hadhi bch yjih notification
+        $student->user->notify(new \App\Notifications\NewGradeNotification(
+            'Une nouvelle note a été ajoutée en ' . $request->course_id
+        ));
 
-        return redirect()->back()->with('success', 'Note ajoutée avec succès !');
+        return redirect()->back()->with('success', 'Note ajoutée avec succès.');
     }
-        public function downloadBulletin(Student $student)
+            public function myProfile()
     {
-        // On charge l'étudiant avec toutes ses relations
-        $student->load(['user', 'classRoom', 'grades.course']);
+        $student = auth()->user()->student;
+        if (!$student) {
+            abort(404, 'Profil étudiant non trouvé.');
+        }
+        $grades = $student->grades()->with('course')->get();
+        $average = $grades->avg('note') ?? 0;
         
-        // On calcule sa moyenne générale
-        $average = $student->grades->avg('note') ?? 0;
+        // Zidna hadhi bch el formulaire mte3 el notes y5dem (7atta ila ma yest7a9'hech l'etudiant)
+        $courses = \App\Models\Course::all(); 
 
-        // On génère le PDF avec la vue 'students.bulletin'
-        $pdf = Pdf::loadView('students.bulletin', compact('student', 'average'));
-
-        // On télécharge le fichier
-        return $pdf->download('bulletin_' . str_replace(' ', '_', $student->user->name) . '.pdf');
+        return view('students.show', compact('student', 'grades', 'average', 'courses'));
     }
         public function absences(Student $student)
     {
-        // On charge l'étudiant avec ses absences et le cours concerné
-        $student->load(['user', 'classRoom', 'absences.course']);
+        // N7emmiw: l'étudiant ychouf ghir les absences mte3ou
+        if (auth()->user()->hasRole('student') && auth()->user()->student->id !== $student->id) {
+            abort(403, 'Vous ne pouvez voir que vos propres absences.');
+        }
+
+        $absences = $student->absences()->with('course')->get();
         $courses = \App\Models\Course::all();
-        
-        return view('students.absences', compact('student', 'courses'));
+        return view('students.absences', compact('student', 'absences', 'courses'));
+    }
+        public function edit(Student $student)
+    {
+        $classes = \App\Models\ClassRoom::all();
+        return view('students.edit', compact('student', 'classes'));
     }
 
-    public function addAbsence(Request $request, Student $student)
+    public function update(Request $request, Student $student)
     {
         $request->validate([
-            'course_id' => 'required|exists:courses,id',
-            'date' => 'required|date',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $student->user_id,
+            'class_id' => 'required|exists:classes,id',
+            'date_naissance' => 'nullable|date',
         ]);
 
-        \App\Models\Absence::create([
-            'student_id' => $student->id,
-            'course_id' => $request->course_id,
-            'date' => $request->date,
-            'justifiee' => $request->has('justifiee') ? true : false,
+        $student->user->update([
+            'name' => $request->name,
+            'email' => $request->email,
         ]);
 
-        return redirect()->back()->with('success', 'Absence enregistrée avec succès !');
+        $student->update([
+            'class_id' => $request->class_id,
+            'date_naissance' => $request->date_naissance,
+        ]);
+
+        return redirect()->route('students.index')->with('success', 'Étudiant mis à jour.');
     }
 }

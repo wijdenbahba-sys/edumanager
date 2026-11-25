@@ -1,47 +1,54 @@
-<x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - EduManager</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body { margin: 0; font-family: 'Inter', sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .glass-card { background: rgba(255, 255, 255, 0.95); padding: 50px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); width: 100%; max-width: 400px; text-align: center; }
+        .glass-card h2 { color: #333; margin: 0 0 10px 0; font-size: 32px; font-weight: 800; }
+        .glass-card p { color: #666; margin-bottom: 30px; }
+        .form-group { text-align: left; margin-bottom: 20px; }
+        .form-group label { display: block; color: #444; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+        .form-group input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; box-sizing: border-box; transition: all 0.3s; background: #f9f9f9; }
+        .form-group input:focus { border-color: #667eea; outline: none; background: #fff; box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2); }
+        .btn-login { width: 100%; padding: 15px; border: none; border-radius: 10px; background: linear-gradient(90deg, #667eea, #764ba2); color: white; font-size: 18px; font-weight: 700; cursor: pointer; transition: transform 0.2s; margin-top: 10px; }
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(118, 75, 162, 0.4); }
+        .footer { margin-top: 20px; font-size: 14px; color: #666; }
+        .footer a { color: #667eea; text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="glass-card">
+        <h2>Bienvenue ! 👋</h2>
+        <p>Connectez-vous à votre espace EduManager</p>
 
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
+        <form method="POST" action="{{ route('login') }}">
+            @csrf
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" placeholder="Votre adresse email" required>
+            </div>
+            <div class="form-group">
+                <label>Mot de passe</label>
+                <input type="password" name="password" placeholder="Votre mot de passe" required>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 14px;">
+                <label style="display: flex; align-items: center; color: #666; cursor: pointer;">
+                    <input type="checkbox" name="remember" style="margin-right: 8px;"> Se souvenir
+                </label>
+                <a href="{{ route('password.request') }}" style="color: #667eea; text-decoration: none;">Mot de passe oublié ?</a>
+            </div>
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+            <button type="submit" class="btn-login">Se connecter</button>
+        </form>
+
+        <div class="footer">
+            Pas encore de compte ? <a href="{{ route('register') }}">S'inscrire</a>
         </div>
-
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+    </div>
+</body>
+</html>

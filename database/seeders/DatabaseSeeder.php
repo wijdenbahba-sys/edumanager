@@ -1,56 +1,68 @@
 <?php
+
 namespace Database\Seeders;
 
 use App\Models\User;
-use App\Models\ClassRoom;
 use App\Models\Student;
 use App\Models\Teacher;
+use App\Models\ClassRoom;
 use App\Models\Course;
 use App\Models\Grade;
+use App\Models\Absence;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Créer un Admin (c'est ton compte actuel, on ne le touche pas)
-        
-        // 2. Créer 3 Classes
-        $c1 = ClassRoom::create(['nom' => '1ère A', 'niveau' => '1ère']);
-        $c2 = ClassRoom::create(['nom' => '2ème B', 'niveau' => '2ème']);
-        $c3 = ClassRoom::create(['nom' => 'Terminale C', 'niveau' => 'Terminale']);
+        $adminRole = Role::create(['name' => 'admin']);
+        $teacherRole = Role::create(['name' => 'teacher']);
+        $studentRole = Role::create(['name' => 'student']);
 
-        // 3. Créer 3 Enseignants
-        $t1 = Teacher::create(['user_id' => User::factory()->create(['name' => 'Prof. Ahmed', 'email' => 'ahmed@test.com', 'password' => Hash::make('password')])->id, 'matiere_principale' => 'Mathématiques']);
-        $t2 = Teacher::create(['user_id' => User::factory()->create(['name' => 'Prof. Sarah', 'email' => 'sarah@test.com', 'password' => Hash::make('password')])->id, 'matiere_principale' => 'Physique']);
-        $t3 = Teacher::create(['user_id' => User::factory()->create(['name' => 'Prof. Karim', 'email' => 'karim@test.com', 'password' => Hash::make('password')])->id, 'matiere_principale' => 'Informatique']);
+        // 1. Admin
+        $admin = User::create(['name' => 'Admin Principal', 'email' => 'admin@edumanager.com', 'password' => Hash::make('password')]);
+        $admin->assignRole('admin');
 
-        // 4. Créer 3 Cours
-        $course1 = Course::create(['nom' => 'Mathématiques Avancées', 'teacher_id' => $t1->id, 'class_id' => $c1->id]);
-        $course2 = Course::create(['nom' => 'Physique Quantique', 'teacher_id' => $t2->id, 'class_id' => $c2->id]);
-        $course3 = Course::create(['nom' => 'Développement Web', 'teacher_id' => $t3->id, 'class_id' => $c3->id]);
+        // 2. Classes
+        $class1 = ClassRoom::create(['nom' => '1ère A', 'niveau' => '1ère']);
+        $class2 = ClassRoom::create(['nom' => '2ème B', 'niveau' => '2ème']);
+        $class3 = ClassRoom::create(['nom' => '3ème C', 'niveau' => '3ème']);
 
-        // 5. Créer 15 Étudiants
-        for ($i = 1; $i <= 15; $i++) {
-            $user = User::factory()->create([
-                'name' => 'Étudiant ' . $i,
-                'email' => 'etudiant' . $i . '@test.com',
-                'password' => Hash::make('password')
-            ]);
+        // 3. Teachers (5)
+        $teachers = [];
+        $matieres = ['Mathématiques', 'Physique', 'Français', 'Anglais', 'Histoire'];
+        foreach ($matieres as $index => $matiere) {
+            $user = User::create(['name' => 'Prof ' . $matiere, 'email' => 'prof' . $index . '@edumanager.com', 'password' => Hash::make('password')]);
+            $user->assignRole('teacher');
+            $teachers[] = Teacher::create(['user_id' => $user->id, 'matiere_principale' => $matiere]);
+        }
 
-            $student = Student::create([
-                'user_id' => $user->id,
-                'class_id' => rand($c1->id, $c3->id), // Assigner à une classe au hasard
-                'date_naissance' => now()->subYears(rand(16, 20))->format('Y-m-d')
-            ]);
+        // 4. Courses
+        $courses = [];
+        foreach ($teachers as $index => $teacher) {
+            $courses[] = Course::create(['nom' => $matieres[$index], 'teacher_id' => $teacher->id, 'class_id' => $class1->id]);
+        }
 
-            // Inscrire l'étudiant à un cours
-            $student->courses()->attach(rand($course1->id, $course3->id));
+        // 5. Students (10)
+        $students = [];
+        for ($i = 1; $i <= 10; $i++) {
+            $user = User::create(['name' => 'Etudiant ' . $i, 'email' => 'etudiant' . $i . '@edumanager.com', 'password' => Hash::make('password')]);
+            $user->assignRole('student');
+            $students[] = Student::create(['user_id' => $user->id, 'class_id' => $class1->id, 'date_naissance' => '2005-01-0' . ($i % 9 + 1)]);
+        }
 
-            // Lui donner 2 notes
-            Grade::create(['student_id' => $student->id, 'course_id' => $course1->id, 'note' => rand(8, 20), 'type' => 'devoir', 'date' => now()]);
-            Grade::create(['student_id' => $student->id, 'course_id' => $course2->id, 'note' => rand(8, 20), 'type' => 'examen', 'date' => now()]);
+        // 6. Grades & Absences (Bch el Dashboard y3ammar)
+        foreach ($students as $student) {
+            foreach ($courses as $course) {
+                // Des notes
+                Grade::create(['student_id' => $student->id, 'course_id' => $course->id, 'note' => rand(10, 20), 'type' => 'devoir', 'date' => now()]);
+                // Des absences
+                if (rand(0, 1)) {
+                    Absence::create(['student_id' => $student->id, 'course_id' => $course->id, 'date' => now(), 'justifiee' => rand(0, 1)]);
+                }
+            }
         }
     }
 }

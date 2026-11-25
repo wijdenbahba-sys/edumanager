@@ -8,6 +8,9 @@
         <!-- En-tête avec le bouton Ajouter -->
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-lg font-bold text-gray-800">Tous les étudiants</h2>
+            <a href="{{ route('export.grades') }}" style="background-color: #16a34a; color: white; padding: 8px 16px; border-radius: 5px; text-decoration: none; font-weight: bold; display: inline-block;">
+                📥 Exporter les Notes
+        </a>
             <a href="{{ route('students.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                 + Ajouter un étudiant
             </a>
@@ -72,7 +75,7 @@
                     
                     <td class="py-3 px-6 text-center">
                         <div class="flex items-center justify-center gap-4">
-                            <a href="{{ route('students.show', $student->id) }}" class="text-blue-600 hover:text-blue-900 font-bold">Voir</a>
+                        <a href="{{ route('students.edit', $student->id) }}" class="text-blue-700 hover:underline mr-4 font-bold">Modifier</a>                            <a href="{{ route('students.show', $student->id) }}" class="text-blue-600 hover:text-blue-900 font-bold">Voir</a>
                             <form action="{{ route('students.destroy', $student->id) }}" method="POST" onsubmit="return confirm('Supprimer cet étudiant ?');">
                                 @csrf
                                 @method('DELETE')

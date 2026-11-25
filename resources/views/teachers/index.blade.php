@@ -13,7 +13,11 @@
                 {{ session('success') }}
             </div>
         @endif
-
+<div class="mb-4">
+    <a href="{{ route('teachers.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        + Ajouter un enseignant
+    </a>
+</div>
         <table class="w-full text-left border-collapse">
             <thead>
                 <tr class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
@@ -34,7 +38,7 @@
                         </span>
                     </td>
                     <td class="py-3 px-6 text-center">
-                        <form action="{{ route('teachers.destroy', $teacher->id) }}" method="POST" onsubmit="return confirm('Supprimer cet enseignant ?');">
+                    <a href="{{ route('teachers.edit', $teacher->id) }}" class="text-blue-700 hover:underline mr-4 font-bold">Modifier</a>                        <form action="{{ route('teachers.destroy', $teacher->id) }}" method="POST" onsubmit="return confirm('Supprimer cet enseignant ?');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-red-600 hover:text-red-900 font-bold">Supprimer</button>
